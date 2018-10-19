@@ -43,6 +43,9 @@ async def on_message(message):
 
         try:
             price = data['data']['quotes'][currency]['price']
+            market_cap = data['data']['quotes'][currency]['market_cap']
+            volume = data['data']['quotes'][currency]['volume_24h']
+            change = data['data']['quotes'][currency]['percent_change_24h']
         except KeyError:
             await client.send_message(
                 message.channel,
@@ -50,10 +53,26 @@ async def on_message(message):
             )
             return
 
-        await client.send_message(
-            message.channel,
-            'Price of {} in {} : ${:.2f}'.format(coin, currency, price)
-        )
+        if change < 0:
+            colour = 0xFF2400
+        else:
+            colour = 0x7FFF00
+
+        embed = discord.Embed(title='{} in {}'.format(coin, currency),
+                              color=colour)
+        embed.add_field(name='Price',
+                        value='${:,.2f}'.format(price),
+                        inline=False)
+        embed.add_field(name='Market Cap',
+                        value='${:,.2f}'.format(market_cap),
+                        inline=True)
+        embed.add_field(name='Volume',value='{:,.2f}'.format(volume),
+                        inline=True)
+        embed.add_field(name='Change',
+                        value='{:,.2f}%'.format(change),
+                        inline=True)
+
+        await client.send_message(message.channel, embed=embed)
     else:
         return
 
